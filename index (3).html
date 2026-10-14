@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Hydration Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+  /* Layout: one centered column, big zip field on top, two stacked result links below. */
+  :root {
+    --bg: #f2f4fb;
+    --surface: #ffffff;
+    --ink: #1b1740;
+    --muted: #5d5a7e;
+    --line: #d9dcef;
+    --cherry: #d81b5b;
+    --cherry-ink: #ffffff;
+    --pool: #0d6fb8;
+    --pool-ink: #ffffff;
+    --focus: #1b1740;
+    --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+    --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14112b;
+      --surface: #1e1a3f;
+      --ink: #f1efff;
+      --muted: #a9a5cf;
+      --line: #342f63;
+      --cherry: #ff4d86;
+      --cherry-ink: #1b1740;
+      --pool: #5db4f2;
+      --pool-ink: #0f1a2b;
+      --focus: #f1efff;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14112b;
+    --surface: #1e1a3f;
+    --ink: #f1efff;
+    --muted: #a9a5cf;
+    --line: #342f63;
+    --cherry: #ff4d86;
+    --cherry-ink: #1b1740;
+    --pool: #5db4f2;
+    --pool-ink: #0f1a2b;
+    --focus: #f1efff;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.5;
+    padding-inline: 1rem;
+    padding-block: 2.5rem 3rem;
+  }
+  main { max-width: 34rem; margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.1rem, 8vw, 3rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 span { color: var(--cherry); }
+  .lede { margin: 0.75rem 0 0; color: var(--muted); max-width: 30rem; }
+
+  form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.5rem; }
+  label {
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+  .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  input {
+    flex: 1 1 9rem; min-width: 0;
+    font: 700 1.6rem/1 var(--font-display);
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+    padding: 0.85rem 1rem;
+    color: var(--ink); background: var(--surface);
+    border: 2px solid var(--line); border-radius: 0.6rem;
+  }
+  input::placeholder { color: var(--muted); opacity: 0.6; letter-spacing: 0.12em; }
+  button {
+    flex: 0 0 auto;
+    font: 700 1.05rem var(--font-body);
+    padding: 0.85rem 1.5rem;
+    border: 0; border-radius: 0.6rem;
+    background: var(--ink); color: var(--bg); cursor: pointer;
+  }
+  input:focus-visible, button:focus-visible, a.result:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  #err { margin: 0; min-height: 1.25rem; font-size: 0.9rem; color: var(--cherry); font-weight: 500; }
+
+  .results { display: grid; gap: 0.75rem; }
+  a.result {
+    display: grid; gap: 0.2rem;
+    padding: 1.1rem 1.25rem;
+    border-radius: 0.8rem;
+    text-decoration: none;
+    min-width: 0;
+  }
+  a.result .kicker { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; }
+  a.result .name { font: 800 1.35rem/1.15 var(--font-display); overflow-wrap: anywhere; }
+  a.result .go { font-size: 0.9rem; opacity: 0.9; }
+  a.ymca { background: var(--pool); color: var(--pool-ink); }
+  a.jam { background: var(--cherry); color: var(--cherry-ink); }
+  a.result:hover { filter: brightness(1.06); }
+
+  .promo { display: grid; gap: 0.6rem; justify-items: start; }
+  button.promo-btn {
+    background: transparent; color: var(--ink);
+    border: 2px solid var(--ink);
+    font: 700 1rem var(--font-body);
+    padding: 0.7rem 1.4rem; border-radius: 0.6rem;
+  }
+  button.promo-btn[aria-expanded="true"] { background: var(--ink); color: var(--bg); }
+  .promo-code {
+    margin: 0;
+    font: 800 clamp(1.8rem, 9vw, 2.6rem)/1 var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--cherry);
+  }
+  .notes { margin: 0; font-size: 0.88rem; color: var(--muted); display: grid; gap: 0.5rem; }
+  .notes p { margin: 0; }
+  .notes a { color: var(--ink); text-underline-offset: 0.18em; }
+  @media (prefers-reduced-motion: no-preference) {
+    a.result { transition: filter 0.15s ease; }
+  }
+</style>
+
+</head>
+<body>
+<main>
+  <header>
+    <h1>Find a <span>hydration packet</span> near me</h1>
+    <p class="lede">Type your zip code. You get the closest YMCA and the stores nearby that might have Kool-Aid Jammers.</p>
+  </header>
+
+  <form id="zipForm" novalidate>
+    <label for="zip">Your zip code</label>
+    <div class="row">
+      <input id="zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="00000" aria-describedby="err">
+      <button type="submit" id="go">Find</button>
+    </div>
+    <p id="err" role="alert"></p>
+  </form>
+
+  <section class="results" aria-live="polite" aria-label="Results">
+    <a class="result ymca" id="ymcaLink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=YMCA+near+me">
+      <span class="kicker" id="ymcaKicker">Closest YMCA</span>
+      <span class="name" id="ymcaName">YMCAs near me</span>
+      <span class="go">Opens in Google Maps</span>
+    </a>
+    <a class="result jam" id="jamLink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Kool-Aid+Jammers+near+me">
+      <span class="kicker" id="jamKicker">Kool-Aid Hydration Packets</span>
+      <span class="name" id="jamName">Hydration near me</span>
+      <span class="go">Opens in Google Maps</span>
+    </a>
+  </section>
+
+  <div class="promo">
+    <button type="button" class="promo-btn" id="promoBtn" aria-expanded="false" aria-controls="promoCode">Promo Code</button>
+    <p class="promo-code" id="promoCode" hidden>OH YEAH!</p>
+  </div>
+
+  <div class="notes">
+    <p>Jammers are sold at ordinary grocery, dollar and convenience stores, and no store keeps a public stock list. Call ahead before you drive.</p>
+    <p>Prefer the official site? <a href="https://www.ymca.org/find-your-y" target="_blank" rel="noopener">Find your Y at ymca.org</a>.</p>
+  </div>
+</main>
+
+<script>
+  var form = document.getElementById('zipForm');
+  var zipEl = document.getElementById('zip');
+  var errEl = document.getElementById('err');
+
+  function mapsUrl(q) {
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+  }
+
+  zipEl.addEventListener('input', function () {
+    zipEl.value = zipEl.value.replace(/\D/g, '').slice(0, 5);
+    errEl.textContent = '';
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var zip = zipEl.value.trim();
+    if (!/^\d{5}$/.test(zip)) {
+      errEl.textContent = 'Enter a 5-digit zip code, like 80202.';
+      zipEl.focus();
+      return;
+    }
+    errEl.textContent = '';
+    document.getElementById('ymcaLink').href = mapsUrl('YMCA near ' + zip);
+    document.getElementById('jamLink').href = mapsUrl('Kool-Aid Jammers near ' + zip);
+    document.getElementById('ymcaKicker').textContent = 'Closest YMCA to ' + zip;
+    document.getElementById('jamKicker').textContent = 'Kool-Aid Hydration Packets near ' + zip;
+    document.getElementById('ymcaName').textContent = 'YMCAs near ' + zip;
+    document.getElementById('jamName').textContent = 'Hydration near ' + zip;
+    document.getElementById('ymcaLink').focus();
+  });
+
+  var promoBtn = document.getElementById('promoBtn');
+  var promoCode = document.getElementById('promoCode');
+  promoBtn.addEventListener('click', function () {
+    var open = promoCode.hidden;
+    promoCode.hidden = !open;
+    promoBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+</script>
+</body>
+</html>
